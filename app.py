@@ -52,19 +52,40 @@ with st.sidebar:
     st.write("Bridging the divide between modern science and ancient wisdom.")
     st.write("⚛️ Quantum Physics\n🧠 Consciousness\n📜 Eastern Philosophy\n🏛️ Western Philosophy")
 
-# 3. AI Engine Setup (LPU Accelerated)
+# 3. AI Engine Setup
 api_key = st.secrets.get("GROQ_API_KEY")
 
 class SimpleEmbedder:
-    def __init__(self): self.model = SentenceTransformer('all-MiniLM-L6-v2')
-    def embed_documents(self, texts): return self.model.encode(texts).tolist()
-    def embed_query(self, text): return self.model.encode([text])[0].tolist()
+    def __init__(self): 
+        self.model = SentenceTransformer('all-MiniLM-L6-v2')
+    def embed_documents(self, texts): 
+        return self.model.encode(texts).tolist()
+    def embed_query(self, text): 
+        return self.model.encode([text])[0].tolist()
 
 @st.cache_resource
 def init_system():
+    if not api_key:
+        st.error("API Key missing in Secrets!")
+        st.stop()
     embeddings = SimpleEmbedder()
     vectorstore = Chroma(persist_directory="./maya_db", embedding_function=embeddings)
     llm = ChatGroq(groq_api_key=api_key, model_name="llama-3.3-70b-versatile")
     return vectorstore.as_retriever(search_kwargs={"k": 4}), llm
 
-if not api_key:
+retriever, llm = init_system()
+
+# 4. Main UI
+st.markdown('<p class="maya-title">Maya-GPT</p>', unsafe_allow_html=True)
+st.write("Synthesizing Quantum Physics, Consciousness, and Universal Philosophy.")
+
+query = st.text_input("", placeholder="Ask the Nexus...", label_visibility="collapsed")
+
+if query:
+    with st.spinner("Decoding the weave..."):
+        # Everything inside this 'if' block must be indented!
+        docs = retriever.invoke(query)
+        context = "\n\n".join([d.page_content for d in docs])
+        
+        system_prompt = (
+            "You
