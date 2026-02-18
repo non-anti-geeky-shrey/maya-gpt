@@ -3,38 +3,59 @@ from sentence_transformers import SentenceTransformer
 from langchain_community.vectorstores import Chroma
 from langchain_groq import ChatGroq
 
-# 1. Page Config & Modern Chat Styling
+# 1. Page Config & Dark Chat Styling
 st.set_page_config(page_title="Maya-GPT", page_icon="🧘", layout="centered")
 
 st.markdown("""
     <style>
-    .stApp { background-color: #fdfcfb; color: #333333; }
+    /* Midnight Dark Background */
+    .stApp { 
+        background-color: #0b0e14; 
+        color: #e2e8f0; 
+    }
     
-    /* Styling the Chat Input at the bottom */
+    /* Header Styling */
+    .main-title {
+        text-align: center; 
+        font-size: 2.5rem; 
+        font-weight: 700;
+        background: -webkit-linear-gradient(#ffffff, #4F8BF9);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-top: 20px;
+    }
+
+    /* Chat Input at the bottom */
     .stChatInputContainer {
         padding-bottom: 20px;
         background-color: transparent !important;
     }
 
-    /* Customizing Chat Bubbles */
-    .stChatMessage {
-        background-color: #ffffff !important;
-        border: 1px solid #f0f0f0 !important;
-        border-radius: 15px !important;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
-        margin-bottom: 10px;
+    .stChatInput input {
+        background-color: #1a1f29 !important;
+        color: white !important;
+        border: 1px solid #30363d !important;
     }
-    
-    .main-title {
-        text-align: center; font-size: 2.2rem; font-weight: 300;
-        color: #2d3436; margin-top: 20px;
+
+    /* Customizing Chat Bubbles for Dark Mode */
+    [data-testid="stChatMessage"] {
+        background-color: #161b22 !important;
+        border: 1px solid #30363d !important;
+        border-radius: 15px !important;
+        margin-bottom: 12px;
+    }
+
+    /* Sidebar Dark Adjustment */
+    [data-testid="stSidebar"] {
+        background-color: #0d1117 !important;
+        border-right: 1px solid #30363d;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. Initialize Session State (This is the "Memory")
+# 2. Initialize Session State (Memory)
 if "messages" not in st.session_state:
-    st.session_state.messages = [] # Stores the chat history
+    st.session_state.messages = []
 
 # 3. AI Engine Setup (Cached)
 api_key = st.secrets.get("GROQ_API_KEY")
@@ -55,15 +76,15 @@ retriever, llm = init_system()
 
 # 4. UI Header
 st.markdown('<h1 class="main-title">Maya-GPT</h1>', unsafe_allow_html=True)
-st.markdown("<p style='text-align:center; color:#636e72;'>The Universal Bridge</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; color:#8b949e;'>The Universal Bridge: Science & Wisdom</p>", unsafe_allow_html=True)
 
 # 5. Display Chat History
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# 6. Chat Input Logic
-if prompt := st.chat_input("Share a thought or ask a question..."):
+# 6. Chat Logic
+if prompt := st.chat_input("Ask the Nexus..."):
     # Display user message
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -71,15 +92,15 @@ if prompt := st.chat_input("Share a thought or ask a question..."):
 
     # Generate Assistant Response
     with st.chat_message("assistant"):
-        with st.spinner("Reflecting..."):
+        with st.spinner("Decoding the weave..."):
             # RAG Retrieval
             docs = retriever.invoke(prompt)
             context = "\n\n".join([d.page_content for d in docs])
             
             system_prompt = (
-                "You are Maya-GPT, a wise and empathetic guide. "
-                "Synthesize Quantum Physics and Philosophy based on the context. "
-                "If the history is relevant, use it to build the conversation.\n\n"
+                "You are Maya-GPT, a synthesis of the world's deepest philosophies and cutting-edge physics. "
+                "Bridge Quantum Physics, Consciousness, Vedanta, and Western Philosophy. "
+                "Provide a profound, clear answer based on the context and conversation history.\n\n"
                 f"Context: {context}\n\nQuestion: {prompt}"
             )
             
@@ -87,5 +108,5 @@ if prompt := st.chat_input("Share a thought or ask a question..."):
             full_response = response.content
             st.markdown(full_response)
     
-    # Save assistant response to history
+    # Save to history
     st.session_state.messages.append({"role": "assistant", "content": full_response})
