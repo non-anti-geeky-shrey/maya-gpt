@@ -24,12 +24,34 @@ class SimpleEmbedder:
 # The rest of your working logic...
 embeddings = SimpleEmbedder()
 vectorstore = Chroma(persist_directory="./maya_db", embedding_function=embeddings)
-retriever = vectorstore.as_retriever(search_kwargs={"k": 2})
+retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
 llm = ChatGroq(groq_api_key=api_key, model_name="llama-3.3-70b-versatile")
 
 user_query = st.text_input("Ask Maya-GPT:")
+
 if user_query:
+    # 1. Increase search depth to 'k=5' to get more of your data
     docs = retriever.invoke(user_query)
+    
+    # 2. Combine the retrieved snippets into one 'context' block
     context = "\n\n".join([d.page_content for d in docs])
-    response = llm.invoke(f"Context: {context}\n\nQuestion: {user_query}")
+    
+    # 3. Use the 'Stronger Prompt' to keep it focused on your 701 chunks
+    system_prompt = (
+        "You are Maya-GPT, an expert in the intersection of Vedanta and Science. "
+        "Use ONLY the following pieces of retrieved context to answer the question. "
+        "Stay grounded in the provided text. If the answer isn't in the context, "
+        "honestly say it isn't explicitly mentioned, but offer a perspective "
+        "based on the available data.\n\n"
+        f"Context: {context}\n\n"
+        f"Question: {user_query}"
+    )
+    
+    # 4. Get the answer from the AI
+    response = llm.invoke(system_prompt)
     st.write(response.content)
+
+    # 5. Optional: See what 'chunks' were used (for your own verification)
+    with st.expander("🔍 View the Source Chunks used for this answer"):
+        for i, doc in enumerate(docs):
+            st.markdown(f"**Chunk {i+1}:**\n{doc.page_content[:200]}...")
