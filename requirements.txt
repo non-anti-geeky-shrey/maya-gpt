@@ -1,0 +1,7 @@
+streamlit
+langchain
+langchain-groq
+langchain-community
+sentence-transformers
+chromadb
+huggingface_hub==0.24.1
