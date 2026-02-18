@@ -3,61 +3,54 @@ from sentence_transformers import SentenceTransformer
 from langchain_community.vectorstores import Chroma
 from langchain_groq import ChatGroq
 
-# 1. Page Config & Dark Chat Styling
+# 1. Page Config & Universal Background Styling
 st.set_page_config(page_title="Maya-GPT", page_icon="🧘", layout="centered")
 
 st.markdown("""
     <style>
-    /* Midnight Dark Background */
-    .stApp { 
-        background-color: #0b0e14; 
-        color: #e2e8f0; 
+    /* Setting a Universal Background Image */
+    .stApp {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                    url("https://images.unsplash.com/photo-1464802686167-b939a67e06a1?q=80&w=2070&auto=format&fit=crop");
+        background-size: cover;
+        background-attachment: fixed;
+        color: #ffffff;
     }
     
-    /* Header Styling */
+    /* Elegant Title */
     .main-title {
         text-align: center; 
-        font-size: 2.5rem; 
-        font-weight: 700;
-        background: -webkit-linear-gradient(#ffffff, #4F8BF9);
+        font-size: 3.5rem; 
+        font-weight: 800;
+        background: -webkit-linear-gradient(#ffffff, #94a3b8);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        margin-top: 20px;
+        margin-bottom: 0px;
     }
 
-    /* Chat Input at the bottom */
-    .stChatInputContainer {
-        padding-bottom: 20px;
-        background-color: transparent !important;
-    }
-
-    .stChatInput input {
-        background-color: #1a1f29 !important;
-        color: white !important;
-        border: 1px solid #30363d !important;
-    }
-
-    /* Customizing Chat Bubbles for Dark Mode */
+    /* Chat Bubble Styling */
     [data-testid="stChatMessage"] {
-        background-color: #161b22 !important;
-        border: 1px solid #30363d !important;
-        border-radius: 15px !important;
-        margin-bottom: 12px;
+        background-color: rgba(255, 255, 255, 0.07) !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px !important;
+        margin-bottom: 15px;
     }
 
-    /* Sidebar Dark Adjustment */
-    [data-testid="stSidebar"] {
-        background-color: #0d1117 !important;
-        border-right: 1px solid #30363d;
+    /* Input Bar Styling */
+    .stChatInput input {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        color: white !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. Initialize Session State (Memory)
+# 2. Session State for Chat History
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# 3. AI Engine Setup (Cached)
+# 3. AI Engine Setup
 api_key = st.secrets.get("GROQ_API_KEY")
 
 class SimpleEmbedder:
@@ -74,33 +67,33 @@ def init_system():
 
 retriever, llm = init_system()
 
-# 4. UI Header
+# 4. Header
 st.markdown('<h1 class="main-title">Maya-GPT</h1>', unsafe_allow_html=True)
-st.markdown("<p style='text-align:center; color:#8b949e;'>The Universal Bridge: Science & Wisdom</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; opacity: 0.8;'>The Universal Bridge: Science & Consciousness</p>", unsafe_allow_html=True)
+st.write("---")
 
 # 5. Display Chat History
 for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
+    avatar = "👤" if message["role"] == "user" else "🧘"
+    with st.chat_message(message["role"], avatar=avatar):
         st.markdown(message["content"])
 
 # 6. Chat Logic
 if prompt := st.chat_input("Ask the Nexus..."):
-    # Display user message
+    # Display User Message
     st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
+    with st.chat_message("user", avatar="👤"):
         st.markdown(prompt)
 
-    # Generate Assistant Response
-    with st.chat_message("assistant"):
+    # Generate Maya's Response
+    with st.chat_message("assistant", avatar="🧘"):
         with st.spinner("Decoding the weave..."):
-            # RAG Retrieval
             docs = retriever.invoke(prompt)
             context = "\n\n".join([d.page_content for d in docs])
             
             system_prompt = (
                 "You are Maya-GPT, a synthesis of the world's deepest philosophies and cutting-edge physics. "
-                "Bridge Quantum Physics, Consciousness, Vedanta, and Western Philosophy. "
-                "Provide a profound, clear answer based on the context and conversation history.\n\n"
+                "Use the following context to provide a profound and poetic bridge between Science and Vedanta.\n\n"
                 f"Context: {context}\n\nQuestion: {prompt}"
             )
             
@@ -108,5 +101,4 @@ if prompt := st.chat_input("Ask the Nexus..."):
             full_response = response.content
             st.markdown(full_response)
     
-    # Save to history
     st.session_state.messages.append({"role": "assistant", "content": full_response})
