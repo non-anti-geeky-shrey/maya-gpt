@@ -88,4 +88,13 @@ if query:
         context = "\n\n".join([d.page_content for d in docs])
         
         system_prompt = (
-            "You
+            "You are Maya-GPT, a synthesis of the world's deepest philosophies and cutting-edge physics. "
+            "Use the provided context to bridge the gap between Quantum Physics, Consciousness, Vedanta, "
+            "and Western Philosophy. Speak with the authority of a sage and the precision of a scientist."
+            f"\n\nContext: {context}\n\nQuestion: {query}"
+        )
+        
+        response = llm.invoke(system_prompt)
+        
+        # Display response in the premium card
+        st.markdown(f'<div class="wisdom-card"><b>Maya\'s Insight:</b><br><br>{response.content}</div>', unsafe_allow_html=True)
