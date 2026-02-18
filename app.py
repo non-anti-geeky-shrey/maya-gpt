@@ -3,56 +3,74 @@ from sentence_transformers import SentenceTransformer
 from langchain_community.vectorstores import Chroma
 from langchain_groq import ChatGroq
 
-# 1. Premium Page Configuration
+# 1. Page Config & Deepak-Inspired Styling
 st.set_page_config(page_title="Maya-GPT", page_icon="🧘", layout="centered")
 
-# Custom CSS for the "Nexus" Glassmorphism Look
+# Custom CSS for the "Deepak Chopra" Aesthetic (Light, Minimal, Elegant)
 st.markdown("""
     <style>
+    /* Background and overall font */
     .stApp { 
-        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); 
-        color: #f8fafc; 
+        background-color: #fdfcfb; 
+        color: #333333;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
-    .stTextInput > div > div > input {
-        background-color: rgba(255, 255, 255, 0.05) !important;
-        color: white !important; 
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        border-radius: 14px !important;
-        padding: 12px !important;
+    
+    /* Center the title and make it elegant */
+    .main-title {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: 300;
+        color: #2d3436;
+        margin-top: 50px;
+        letter-spacing: -1px;
+    }
+    
+    .subtitle {
+        text-align: center;
         font-size: 1.1rem;
+        color: #636e72;
+        margin-bottom: 40px;
     }
+
+    /* Minimalist Search Bar */
+    .stTextInput > div > div > input {
+        background-color: #ffffff !important;
+        color: #333333 !important; 
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 30px !important; /* Rounded like Deepak's site */
+        padding: 15px 25px !important;
+        font-size: 1.1rem !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02) !important;
+    }
+
+    /* Floating Wisdom Card */
     .wisdom-card {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(15px);
-        border-radius: 24px;
+        background: #ffffff;
+        border-radius: 20px;
         padding: 40px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+        border: 1px solid #f0f0f0;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
         margin-top: 30px;
-        font-size: 1.15rem;
-        line-height: 1.7;
-        color: #e2e8f0;
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #2d3436;
+        animation: fadeIn 0.8s ease-in;
     }
-    .maya-title {
-        font-size: 3rem;
-        font-weight: 800;
-        background: -webkit-linear-gradient(#fff, #94a3b8);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 0px;
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
+
+    /* Hide Streamlit default elements for a cleaner look */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
     </style>
     """, unsafe_allow_html=True)
 
-# 2. Sidebar branding
-with st.sidebar:
-    st.markdown("## 🧘 Maya-GPT")
-    st.caption("The Universal Bridge")
-    st.markdown("---")
-    st.write("Bridging the divide between modern science and ancient wisdom.")
-    st.write("⚛️ Quantum Physics\n🧠 Consciousness\n📜 Eastern Philosophy\n🏛️ Western Philosophy")
-
-# 3. AI Engine Setup
+# 2. AI Engine Setup
 api_key = st.secrets.get("GROQ_API_KEY")
 
 class SimpleEmbedder:
@@ -75,26 +93,29 @@ def init_system():
 
 retriever, llm = init_system()
 
-# 4. Main UI
-st.markdown('<p class="maya-title">Maya-GPT</p>', unsafe_allow_html=True)
-st.write("Synthesizing Quantum Physics, Consciousness, and Universal Philosophy.")
+# 3. Main UI Layout
+st.markdown('<h1 class="main-title">Maya-GPT</h1>', unsafe_allow_html=True)
+st.markdown('<p class="subtitle">A Bridge Between Science, Philosophy, and Consciousness</p>', unsafe_allow_html=True)
 
-query = st.text_input("", placeholder="Ask the Nexus...", label_visibility="collapsed")
+# Central Input
+query = st.text_input("", placeholder="Ask a question or share a thought...", label_visibility="collapsed")
 
 if query:
-    with st.spinner("Decoding the weave..."):
-        # Everything inside this 'if' block must be indented!
+    with st.spinner("Reflecting..."):
+        # RAG Logic
         docs = retriever.invoke(query)
         context = "\n\n".join([d.page_content for d in docs])
         
         system_prompt = (
-            "You are Maya-GPT, a synthesis of the world's deepest philosophies and cutting-edge physics. "
-            "Use the provided context to bridge the gap between Quantum Physics, Consciousness, Vedanta, "
-            "and Western Philosophy. Speak with the authority of a sage and the precision of a scientist."
-            f"\n\nContext: {context}\n\nQuestion: {query}"
+            "You are Maya-GPT, inspired by the depth of Deepak Chopra and the precision of Quantum Physics. "
+            "Your purpose is to provide reflections based on Vedanta, Western Philosophy, and Science. "
+            "Be empathetic, wise, and clear. You can answer in any language the user asks in.\n\n"
+            f"Context: {context}\n\nQuestion: {query}"
         )
         
         response = llm.invoke(system_prompt)
         
-        # Display response in the premium card
-        st.markdown(f'<div class="wisdom-card"><b>Maya\'s Insight:</b><br><br>{response.content}</div>', unsafe_allow_html=True)
+        # Display response in the "Zen" card
+        st.markdown(f'<div class="wisdom-card">{response.content}</div>', unsafe_allow_html=True)
+
+st.markdown("<br><br><p style='text-align:center; color:#b2bec3; font-size:0.8rem;'>Inspired by Universal Wisdom & Modern Science</p>", unsafe_allow_html=True)
