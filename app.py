@@ -29,7 +29,7 @@ llm = ChatGroq(groq_api_key=api_key, model_name="llama-3.3-70b-versatile")
 
 user_query = st.text_input("Ask Maya-GPT:")
 if user_query:
-    docs = retriever.get_relevant_documents(user_query)
+    docs = retriever.invoke(user_query)
     context = "\n\n".join([d.page_content for d in docs])
     response = llm.invoke(f"Context: {context}\n\nQuestion: {user_query}")
     st.write(response.content)
