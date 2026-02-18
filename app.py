@@ -143,4 +143,9 @@ if prompt := st.chat_input("Ask the Nexus..."):
             system_prompt = (
                 "You are Maya-GPT, a profound synthesis of Science and Philosophy. "
                 "Provide a clear, symmetric, and insightful response bridging the two fields.\n\n"
-                f
+                f"Context: {context}\n\nQuestion: {prompt}"
+            )
+            
+            response = llm.invoke(system_prompt)
+            st.markdown(response.content)
+            st.session_state.messages.append({"role": "assistant", "content": response.content})
