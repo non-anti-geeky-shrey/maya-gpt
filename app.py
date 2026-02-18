@@ -132,3 +132,10 @@ if prompt := st.chat_input("Ask the Nexus..."):
             response = llm.invoke(system_prompt)
             st.markdown(response.content)
             st.session_state.messages.append({"role": "assistant", "content": response.content})
+            st.markdown("---")
+st.markdown(
+    "<div style='text-align: center; color: #64748b; font-size: 0.8rem;'>"
+    "Built with 💙 by [Your Name] | Powered by Llama 3.3 & RAG Logic"
+    "</div>", 
+    unsafe_allow_html=True
+)
