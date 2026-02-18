@@ -11,7 +11,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# 2. ADVANCED CSS: GEMINI-STYLE POSITIONING
+# 2. ADVANCED CSS: SYMMETRIC POSITIONING & HD GLASS
 st.markdown("""
     <style>
     /* HD Background */
@@ -24,45 +24,62 @@ st.markdown("""
         color: #ffffff;
     }
 
-    /* Target the Chat Message Container */
+    /* Universal Chat Bubble Styling */
     [data-testid="stChatMessage"] {
         background: rgba(255, 255, 255, 0.03) !important;
         backdrop-filter: blur(25px) saturate(180%);
+        -webkit-backdrop-filter: blur(25px) saturate(180%);
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
         border-radius: 20px !important;
         padding: 15px !important;
         margin-bottom: 20px;
         width: fit-content !important;
-        max-width: 80% !important;
+        max-width: 85% !important;
     }
 
-    /* MOVE USER TO THE RIGHT */
-    [data-testid="stChatMessageContent"]:has(div[aria-label="user"]) {
-        margin-left: auto !important;
-        text-align: right !important;
+    /* POSITIONING: AI (Assistant) stays Left */
+    .stChatMessage:has([aria-label="assistant"]) {
+        margin-right: auto !important;
     }
-    
-    /* Target the container of the user message to align right */
+
+    /* POSITIONING: User moves to Right */
     .stChatMessage:has([aria-label="user"]) {
         margin-left: auto !important;
         flex-direction: row-reverse !important;
-        background: rgba(79, 139, 249, 0.1) !important; /* Subtle blue tint for user */
+        background: rgba(79, 139, 249, 0.08) !important; /* Subtle blue tint */
+        border: 1px solid rgba(79, 139, 249, 0.2) !important;
     }
 
     /* Header Styling */
     .header-container { text-align: center; margin-top: 20px; margin-bottom: 40px; }
     .main-title {
-        font-size: 3.5rem; font-weight: 900; letter-spacing: -2px;
+        font-size: 3.8rem; font-weight: 900; letter-spacing: -2px;
         background: linear-gradient(180deg, #ffffff 0%, #64748b 100%);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        line-height: 1.1;
     }
-    .subtopic { font-size: 0.8rem; letter-spacing: 5px; text-transform: uppercase; color: #94a3b8; }
+    .subtopic { 
+        font-size: 0.85rem; 
+        letter-spacing: 4px; 
+        text-transform: uppercase; 
+        color: #94a3b8; 
+        font-weight: 600;
+        margin-top: 15px;
+    }
+
+    /* Input Bar Polish */
+    .stChatInput input {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-radius: 14px !important;
+        color: white !important;
+    }
 
     #MainMenu, footer, header {visibility: hidden;}
     </style>
     """, unsafe_allow_html=True)
 
-# 3. BACKEND (RAG & LLM)
+# 3. BACKEND INITIALIZATION
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -82,34 +99,36 @@ def init_system():
 
 retriever, llm = init_system()
 
-# 4. HEADER
+# 4. CENTRIC HEADER
 st.markdown('<div class="header-container">', unsafe_allow_html=True)
 logo_path = "Gemini_Generated_Image_vj0o5qvj0o5qvj0o.png"
 if os.path.exists(logo_path):
-    col1, col2, col3 = st.columns([1, 1, 1])
-    with col2: st.image(logo_path, use_container_width=True)
+    left_co, cent_co, last_co = st.columns([1, 1, 1])
+    with cent_co: st.image(logo_path, use_container_width=True)
 st.markdown('<h1 class="main-title">Maya-GPT</h1>', unsafe_allow_html=True)
-st.markdown('<p class="subtopic">Universal Wisdom Nexus</p>', unsafe_allow_html=True)
+st.markdown('<p class="subtopic">Synthesis of Quantum Physics & Ancient Wisdom</p>', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
-# 5. CHAT DISPLAY
+# 5. CHAT DISPLAY (With Symmetric Avatars)
 for message in st.session_state.messages:
-    # Use avatar directly in the call
     avatar = "👤" if message["role"] == "user" else "🧘"
     with st.chat_message(message["role"], avatar=avatar):
         st.markdown(message["content"])
 
-# 6. INTERACTION
+# 6. INTERACTION LOGIC
 if prompt := st.chat_input("Ask the Nexus..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user", avatar="👤"):
         st.markdown(prompt)
 
     with st.chat_message("assistant", avatar="🧘"):
-        with st.spinner("Decoding..."):
+        with st.spinner("Analyzing..."):
             docs = retriever.invoke(prompt)
             context = "\n\n".join([d.page_content for d in docs])
-            system_prompt = f"You are Maya-GPT. Bridge Science/Wisdom. Context: {context}\n\nQuestion: {prompt}"
+            system_prompt = (
+                "You are Maya-GPT. Provide a profound synthesis of Science and Wisdom. "
+                f"Context: {context}\n\nQuestion: {prompt}"
+            )
             response = llm.invoke(system_prompt)
             st.markdown(response.content)
             st.session_state.messages.append({"role": "assistant", "content": response.content})
