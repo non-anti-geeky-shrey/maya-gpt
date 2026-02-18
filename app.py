@@ -3,54 +3,56 @@ from sentence_transformers import SentenceTransformer
 from langchain_community.vectorstores import Chroma
 from langchain_groq import ChatGroq
 
-# 1. Page & UI Styling
-st.set_page_config(page_title="Maya-GPT", page_icon="🧘", layout="wide")
+# 1. Premium Page Configuration
+st.set_page_config(page_title="Maya-GPT", page_icon="🧘", layout="centered")
 
-# Enhanced "Premium Universal Bridge" Styling
+# Custom CSS for the "Nexus" Glassmorphism Look
 st.markdown("""
     <style>
-    .main { 
+    .stApp { 
         background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); 
-        color: white; 
+        color: #f8fafc; 
     }
     .stTextInput > div > div > input {
-        background-color: rgba(255, 255, 255, 0.07) !important;
+        background-color: rgba(255, 255, 255, 0.05) !important;
         color: white !important; 
         border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        border-radius: 12px !important;
+        border-radius: 14px !important;
         padding: 12px !important;
+        font-size: 1.1rem;
     }
     .wisdom-card {
-        background: rgba(255, 255, 255, 0.04);
-        backdrop-filter: blur(12px);
-        border-radius: 20px;
-        padding: 35px;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(15px);
+        border-radius: 24px;
+        padding: 40px;
         border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-        margin-top: 25px;
-        line-height: 1.6;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+        margin-top: 30px;
+        font-size: 1.15rem;
+        line-height: 1.7;
+        color: #e2e8f0;
     }
-    .stExpander {
-        background-color: rgba(255, 255, 255, 0.02) !important;
-        border-radius: 10px !important;
-        border: none !important;
+    .maya-title {
+        font-size: 3rem;
+        font-weight: 800;
+        background: -webkit-linear-gradient(#fff, #94a3b8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0px;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. Sidebar with Custom Branding (Reset Button Removed)
+# 2. Sidebar branding
 with st.sidebar:
-    st.title("💠 Maya-GPT")
-    st.markdown("### The Universal Bridge")
-    st.write("Synthesizing insights from:")
-    st.write("🌌 **Quantum Physics**")
-    st.write("🧠 **Consciousness**")
-    st.write("📜 **Ancient Vedanta**")
-    st.write("🎭 **Modern Philosophy**")
-    st.divider()
-    st.caption("Llama 3.3 | Groq LPU™")
+    st.markdown("## 🧘 Maya-GPT")
+    st.caption("The Universal Bridge")
+    st.markdown("---")
+    st.write("Bridging the divide between modern science and ancient wisdom.")
+    st.write("⚛️ Quantum Physics\n🧠 Consciousness\n📜 Eastern Philosophy\n🏛️ Western Philosophy")
 
-# 3. Backend (Your RAG Logic)
+# 3. AI Engine Setup (LPU Accelerated)
 api_key = st.secrets.get("GROQ_API_KEY")
 
 class SimpleEmbedder:
@@ -59,46 +61,10 @@ class SimpleEmbedder:
     def embed_query(self, text): return self.model.encode([text])[0].tolist()
 
 @st.cache_resource
-def init_nexus():
+def init_system():
     embeddings = SimpleEmbedder()
     vectorstore = Chroma(persist_directory="./maya_db", embedding_function=embeddings)
     llm = ChatGroq(groq_api_key=api_key, model_name="llama-3.3-70b-versatile")
     return vectorstore.as_retriever(search_kwargs={"k": 4}), llm
 
 if not api_key:
-    st.error("Missing API Key! Please check Streamlit Secrets.")
-    st.stop()
-
-retriever, llm = init_nexus()
-
-# 4. Main Interface
-st.title("🧘 Maya-GPT: The Universal Bridge")
-st.write("Exploring the intersection of objective reality and subjective experience.")
-
-query = st.text_input("Pose your question to the collective wisdom:", placeholder="e.g. How does the observer effect relate to non-duality?")
-
-if query:
-    with st.spinner("Decoding the weave..."):
-        # Retrieval
-        docs = retriever.invoke(query)
-        context = "\n\n".join([d.page_content for d in docs])
-        
-        # Synthesis Prompt
-        prompt = (
-            "You are Maya-GPT, a synthesis of the world's deepest philosophies and cutting-edge physics. "
-            "Your task is to bridge the gap between Quantum Physics, Consciousness, Vedanta, and Western Philosophy. "
-            f"\n\nContext: {context}\n\nQuestion: {query}\n\n"
-            "Provide a structured, profound answer. Do not use disclaimers like 'based on the context.' "
-            "Speak with clarity and wisdom."
-        )
-        
-        # LLM Call
-        res = llm.invoke(prompt)
-        
-        # The beautiful response card
-        st.markdown(f'<div class="wisdom-card"><b>Maya\'s Insight:</b><br><br>{res.content}</div>', unsafe_allow_html=True)
-
-        # Subtle source expander
-        with st.expander("🔍 View Retreived Fragments"):
-            for d in docs: 
-                st.caption(f"• {d.page_content}")
