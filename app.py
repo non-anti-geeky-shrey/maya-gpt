@@ -9,7 +9,7 @@ api_key = st.secrets.get("GROQ_API_KEY")
 
 st.set_page_config(page_title="Maya-GPT", page_icon="🧘")
 st.title("🧘 Maya-GPT: The Universal Bridge")
-st.markdown("### Bridging Quantum Physics, Consciousness, and Philosophy")
+st.markdown("### Bridging Quantum Physics, Consciousness, and Eastern Vedantic Philosophy")
 
 if not api_key:
     st.error("API Key not found in Secrets! Please add GROQ_API_KEY to your Streamlit settings.")
