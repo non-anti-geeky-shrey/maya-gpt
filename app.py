@@ -3,14 +3,14 @@ from sentence_transformers import SentenceTransformer
 from langchain_community.vectorstores import Chroma
 from langchain_groq import ChatGroq
 
-# 1. Page Config & High-Definition Dark Glass Styling
+# 1. Page Config & Symmetry Styling
 st.set_page_config(page_title="Maya-GPT", page_icon="🧘", layout="centered")
 
 st.markdown("""
     <style>
-    /* 1. Deep HD Background with subtle overlay */
+    /* 1. Deep HD Background */
     .stApp {
-        background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)), 
+        background: linear-gradient(rgba(0, 0, 0, 0.88), rgba(0, 0, 0, 0.88)), 
                     url("https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2022&auto=format&fit=crop");
         background-size: cover;
         background-position: center;
@@ -18,60 +18,70 @@ st.markdown("""
         color: #ffffff;
     }
     
-    /* 2. Razor-Sharp Glassmorphism for Messages */
-    [data-testid="stChatMessage"] {
-        background: rgba(255, 255, 255, 0.03) !important;
-        backdrop-filter: blur(20px) saturate(180%);
-        -webkit-backdrop-filter: blur(20px) saturate(180%);
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 20px !important;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        margin-bottom: 18px;
+    /* 2. Perfectly Centered Header & Subtopic */
+    .header-container {
+        text-align: center;
+        margin-top: 40px;
+        margin-bottom: 50px;
     }
 
-    /* 3. HD Typography */
     .main-title {
-        text-align: center; 
-        font-size: 4rem; 
+        font-size: 4.2rem; 
         font-weight: 900;
         letter-spacing: -2px;
-        background: linear-gradient(180deg, #ffffff 0%, #4b5563 100%);
+        background: linear-gradient(180deg, #ffffff 0%, #64748b 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        margin-bottom: 0px;
+        margin: 0;
+        line-height: 1;
     }
 
-    .sub-text {
-        text-align: center;
+    .subtopic {
+        font-size: 0.85rem;
+        letter-spacing: 6px;
         text-transform: uppercase;
-        letter-spacing: 5px;
-        font-size: 0.75rem;
         color: #94a3b8;
-        margin-bottom: 40px;
-        font-weight: 600;
+        font-weight: 500;
+        margin-top: 15px;
     }
 
-    /* 4. Sharp Input Field */
+    /* 3. Symmetric Glass Bubbles */
+    [data-testid="stChatMessage"] {
+        background: rgba(255, 255, 255, 0.03) !important;
+        backdrop-filter: blur(25px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 24px !important;
+        padding: 25px !important;
+        margin-bottom: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    /* 4. Balanced Input Field */
+    .stChatInput {
+        padding-bottom: 40px;
+    }
+    
     .stChatInput input {
         background-color: rgba(255, 255, 255, 0.05) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 12px !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-radius: 16px !important;
         color: white !important;
-        backdrop-filter: blur(10px);
+        font-size: 1.1rem !important;
+        padding: 15px !important;
     }
 
-    /* Remove Streamlit branding for "App" feel */
+    /* Hide unnecessary UI elements */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
     </style>
     """, unsafe_allow_html=True)
 
-# 2. Session State
+# 2. Session State for Chat Memory
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# 3. AI Engine
+# 3. AI Core Setup
 api_key = st.secrets.get("GROQ_API_KEY")
 
 class SimpleEmbedder:
@@ -88,25 +98,34 @@ def init_system():
 
 retriever, llm = init_system()
 
-# 4. Content
-st.markdown('<h1 class="main-title">MAYA</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-text">Universal Wisdom Nexus</p>', unsafe_allow_html=True)
+# 4. Perfectly Centric Header
+st.markdown("""
+    <div class="header-container">
+        <h1 class="main-title">Maya-GPT</h1>
+        <p class="subtopic">Synthesis of Quantum Physics & Ancient Wisdom</p>
+    </div>
+    """, unsafe_allow_html=True)
 
+# 5. Chat Display
 for message in st.session_state.messages:
     avatar = "👤" if message["role"] == "user" else "🧘"
     with st.chat_message(message["role"], avatar=avatar):
         st.markdown(message["content"])
 
-if prompt := st.chat_input("Inquire..."):
+# 6. Interaction Logic
+if prompt := st.chat_input("Ask the Nexus..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user", avatar="👤"):
         st.markdown(prompt)
 
     with st.chat_message("assistant", avatar="🧘"):
-        with st.spinner("Analyzing..."):
+        with st.spinner("Decoding..."):
             docs = retriever.invoke(prompt)
             context = "\n\n".join([d.page_content for d in docs])
-            system_prompt = f"You are Maya-GPT. Context: {context}\n\nQuestion: {prompt}"
+            system_prompt = (
+                "You are Maya-GPT, a profound synthesis of Science and Philosophy. "
+                f"Context: {context}\n\nQuestion: {prompt}"
+            )
             response = llm.invoke(system_prompt)
             st.markdown(response.content)
             st.session_state.messages.append({"role": "assistant", "content": response.content})
